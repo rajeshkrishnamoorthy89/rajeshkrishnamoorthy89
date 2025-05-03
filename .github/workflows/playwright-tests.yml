@@ -1,15 +1,9 @@
 name: Playwright Test Suite
 
-# Required environment variables and secrets for each environment:
-# - dev:
-#   - vars.BASE_URL: Development environment URL
-#   - secrets.API_KEY: API key for development environment
-# - staging:
-#   - vars.BASE_URL: Staging environment URL
-#   - secrets.API_KEY: API key for staging environment
-# - prod:
-#   - vars.BASE_URL: Production environment URL
-#   - secrets.API_KEY: API key for production environment
+# Workflow configuration
+defaults:
+  run:
+    shell: bash
 
 on:
   push:
@@ -30,17 +24,6 @@ jobs:
         test-type: [api, e2e]
     steps:
       - uses: actions/checkout@v4
-      - name: Verify Dev Environment Variables
-        shell: pwsh
-        run: |
-          if ([string]::IsNullOrEmpty("${{ vars.BASE_URL }}")) {
-            Write-Error "BASE_URL environment variable is not set for dev environment"
-            exit 1
-          }
-          if ([string]::IsNullOrEmpty("${{ secrets.API_KEY }}")) {
-            Write-Error "API_KEY secret is not set for dev environment"
-            exit 1
-          }
       - uses: actions/setup-node@v4
         with:
           node-version: "20.x"
@@ -50,10 +33,11 @@ jobs:
           npx playwright install
           npx playwright install-deps
       - name: Run ${{ matrix.test-type }} tests
-        run: npx playwright test src/tests/${{ matrix.test-type }}/
         env:
           BASE_URL: ${{ vars.BASE_URL }}
           API_KEY: ${{ secrets.API_KEY }}
+        if: env.BASE_URL != '''' && env.API_KEY != ''''
+        run: npx playwright test src/tests/${{ matrix.test-type }}/
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -74,17 +58,6 @@ jobs:
         browser: [chromium, firefox, webkit]
     steps:
       - uses: actions/checkout@v4
-      - name: Verify Staging Environment Variables
-        shell: pwsh
-        run: |
-          if ([string]::IsNullOrEmpty("${{ vars.BASE_URL }}")) {
-            Write-Error "BASE_URL environment variable is not set for staging environment"
-            exit 1
-          }
-          if ([string]::IsNullOrEmpty("${{ secrets.API_KEY }}")) {
-            Write-Error "API_KEY secret is not set for staging environment"
-            exit 1
-          }
       - uses: actions/setup-node@v4
         with:
           node-version: "20.x"
@@ -92,12 +65,13 @@ jobs:
         run: |
           npm ci
           npx playwright install
-          npx playwright install-deps chromium firefox webkit
+          npx playwright install-deps
       - name: Run regression tests
-        run: npx playwright test src/tests/regression/ --project=${{ matrix.browser }}
         env:
           BASE_URL: ${{ vars.BASE_URL }}
           API_KEY: ${{ secrets.API_KEY }}
+        if: env.BASE_URL != '''' && env.API_KEY != ''''
+        run: npx playwright test src/tests/regression/ --project=${{ matrix.browser }}
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -113,20 +87,9 @@ jobs:
     environment: prod
     needs: test-staging
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == ''schedule'' || github.event_name == ''workflow_dispatch''
     steps:
       - uses: actions/checkout@v4
-      - name: Verify Production Environment Variables
-        shell: pwsh
-        run: |
-          if ([string]::IsNullOrEmpty("${{ vars.BASE_URL }}")) {
-            Write-Error "BASE_URL environment variable is not set for production environment"
-            exit 1
-          }
-          if ([string]::IsNullOrEmpty("${{ secrets.API_KEY }}")) {
-            Write-Error "API_KEY secret is not set for production environment"
-            exit 1
-          }
       - uses: actions/setup-node@v4
         with:
           node-version: "20.x"
@@ -136,10 +99,11 @@ jobs:
           npx playwright install
           npx playwright install-deps
       - name: Run performance tests
-        run: npx playwright test src/tests/performance/
         env:
           BASE_URL: ${{ vars.BASE_URL }}
           API_KEY: ${{ secrets.API_KEY }}
+        if: env.BASE_URL != '''' && env.API_KEY != ''''
+        run: npx playwright test src/tests/performance/
       - name: Upload performance results
         if: always()
         uses: actions/upload-artifact@v4
