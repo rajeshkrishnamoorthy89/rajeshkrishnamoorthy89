@@ -1,0 +1,23 @@
+{
+  "name": "playwrightmcpetoe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:e2e": "playwright test src/tests/e2e/",
+    "test:api": "playwright test src/tests/api/",
+    "test:performance": "playwright test src/tests/performance/",
+    "test:regression": "playwright test src/tests/regression/",
+    "test:ui": "playwright test --ui",
+    "show-report": "playwright show-report",
+    "test:debug": "playwright test --debug"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^22.15.3"
+  }
+}
