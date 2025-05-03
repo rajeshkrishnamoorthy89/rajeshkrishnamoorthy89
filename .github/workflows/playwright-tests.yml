@@ -1,12 +1,5 @@
 name: Playwright Test Suite
 
-# Command definitions
-.playwright-install: &playwright-install |
-    # Install Playwright and browsers with dependencies
-    npm ci
-    npx playwright install
-    npx playwright install-deps
-
 # Required environment variables and secrets for each environment:
 # - dev:
 #   - vars.BASE_URL: Development environment URL
@@ -51,10 +44,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20.x"
-      - name: Install dependencies
-        run: npm ci
-      - name: Install Playwright
-        run: npx playwright install --with-deps chromium
+      - name: Install dependencies and browsers
+        run: |
+          npm ci
+          npx playwright install
+          npx playwright install-deps
       - name: Run ${{ matrix.test-type }} tests
         run: npx playwright test src/tests/${{ matrix.test-type }}/
         env:
@@ -98,11 +92,7 @@ jobs:
         run: |
           npm ci
           npx playwright install
-          npx playwright install-deps
-          # Install specific browser if needed
-          if [ "${{ matrix.browser }}" != "chromium" ]; then
-            npx playwright install --with-deps ${{ matrix.browser }}
-          fi
+          npx playwright install-deps chromium firefox webkit
       - name: Run regression tests
         run: npx playwright test src/tests/regression/ --project=${{ matrix.browser }}
         env:
@@ -140,10 +130,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20.x"
-      - name: Install dependencies
-        run: npm ci
-      - name: Install Playwright
-        run: npx playwright install --with-deps chromium
+      - name: Install dependencies and browsers
+        run: |
+          npm ci
+          npx playwright install
+          npx playwright install-deps
       - name: Run performance tests
         run: npx playwright test src/tests/performance/
         env:
